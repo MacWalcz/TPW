@@ -4,5 +4,5 @@
 
 | Name Surname (initials) | GUID                                     |
 | ----------------------- | ---------------------------------------- |
-| AB                      | `{FD9D086C-532F-4AAC-BB99-69D7798837D8}` |
-| Jan Kowalski            | `{44FBFCF5-4430-4964-878D-1867DC679E0D}` |
+| MW                      | `{415cefc4-8b0e-4ea3-a6b5-ad8b0e705f5e}` |
+| BD                      | `{919c2dde-cbde-4355-b3a6-6ece15d00bcb}` |
