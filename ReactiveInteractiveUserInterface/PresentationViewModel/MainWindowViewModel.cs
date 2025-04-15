@@ -46,6 +46,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             Observer.Dispose();
         }
 
+<<<<<<< HEAD
         public event Action<double, double> ScaleChanged;
 
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
@@ -138,5 +139,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         }
         #endregion private
        
+=======
+        
+        Disposed = true;
+      }
+>>>>>>> 2c9cce15e58a29fa485b6995f234ffa9e6fa81f0
     }
 }

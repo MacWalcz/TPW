@@ -18,31 +18,43 @@ namespace TP.ConcurrentProgramming.PresentationView
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        public int numberOfBalls { get;  set; }
         public MainWindow()
         {
-            Random random = new Random();
             InitializeComponent();
             MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
-            viewModel.WindowWidth = this.Width;
-            viewModel.WindowHeight = this.Height;
-            viewModel.Start(random.Next(5, 10));
 
-            this.SizeChanged += (s, e) =>
+            var chooser = new BillChooserWindow();
+
+            if (chooser.ShowDialog() == true)
             {
-                viewModel.WindowWidth = this.ActualWidth;
-                viewModel.WindowHeight = this.ActualHeight;
-            };
+                this.numberOfBalls = chooser.numberOfBalls;
+
+
+                MessageBox.Show($"Wybrano {numberOfBalls} bil");
+              
+                if (DataContext is MainWindowViewModel vm)
+                {
+                    vm.Start(numberOfBalls);
+                }
+               
+            }
+            else
+            {
+                Application.Current.Shutdown();
+            }
         }
 
-        /// <summary>
-        /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.
-        /// </summary>
-        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-        protected override void OnClosed(EventArgs e)
-        {
-            if (DataContext is MainWindowViewModel viewModel)
-                viewModel.Dispose();
-            base.OnClosed(e);
-        }
+    /// <summary>
+    /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.
+    /// </summary>
+    /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
+    protected override void OnClosed(EventArgs e)
+    {
+      if (DataContext is MainWindowViewModel viewModel)
+        viewModel.Dispose();
+      base.OnClosed(e);
     }
+  }
 }
