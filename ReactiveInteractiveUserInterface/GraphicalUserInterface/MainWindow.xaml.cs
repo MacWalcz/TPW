@@ -25,6 +25,15 @@ namespace TP.ConcurrentProgramming.PresentationView
             InitializeComponent();
             MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
 
+            viewModel.WindowWidth = this.Width;
+            viewModel.WindowHeight = this.Height;
+
+            
+            this.SizeChanged += (s, e) =>
+            {
+                viewModel.WindowWidth = this.ActualWidth;
+                viewModel.WindowHeight = this.ActualHeight;
+            };
             var chooser = new BillChooserWindow();
 
             if (chooser.ShowDialog() == true)
@@ -38,6 +47,7 @@ namespace TP.ConcurrentProgramming.PresentationView
                 {
                     vm.Start(numberOfBalls);
                 }
+
                
             }
             else

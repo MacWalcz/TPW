@@ -26,17 +26,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
         {
             ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
-            Observer = ModelLayer.Subscribe<ModelIBall>(x =>
-            {
-        
-                Balls.Add(x);
-            });  
+            WindowSizeChanged += ModelLayer.OnWindowSizeChanged;
+            Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
         }
-         
+
 
         #endregion ctor
 
         #region public API
+
+        public double BorderWidth => ModelLayer.BoardWidth;
+        public double BorderHeight => ModelLayer.BoardHeight;
 
         public void Start(int numberOfBalls)
         {
@@ -45,12 +45,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             ModelLayer.Start(numberOfBalls);
             Observer.Dispose();
         }
-
-<<<<<<< HEAD
-        public event Action<double, double> ScaleChanged;
-
+       
         public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
-
+        public event Action<double, double> WindowSizeChanged;
+        
+        
         public double WindowWidth
         {
             get => _windowWidth;
@@ -59,9 +58,9 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 if (_windowWidth != value)
                 {
                     _windowWidth = value;
-                    RaisePropertyChanged(nameof(WindowWidth));
-                    RaisePropertyChanged(nameof(ScaleWidth));
-                    UpdateBorderSize();
+                    RaisePropertyChanged(nameof(BorderWidth));
+                    RaisePropertyChanged(nameof(BorderHeight));
+                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                 }
             }
         }
@@ -74,17 +73,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 if (_windowHeight != value)
                 {
                     _windowHeight = value;
-                    RaisePropertyChanged(nameof(WindowHeight));
-                    RaisePropertyChanged(nameof(ScaleHeight));
-                    UpdateBorderSize();
+                    RaisePropertyChanged(nameof(BorderWidth));
+                    RaisePropertyChanged(nameof(BorderHeight));
+                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                 }
             }
         }
 
-        public double ScaleWidth => WindowWidth > 0 ? WindowWidth / 1000 : 1;
-        public double ScaleHeight => WindowHeight > 0 ? WindowHeight / 1000 : 1;
-        public double BorderWidth => ScaleWidth * ModelAbstractApi.PresentationDimensions.TableWidth * 4; 
-        public double BorderHeight => ScaleHeight * ModelAbstractApi.PresentationDimensions.TableHeight * 4.2;
+      
+   
 
         #endregion public API
 
@@ -96,10 +93,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             {
                 if (disposing)
                 {
-                    foreach (ModelIBall ball in Balls)
-                    {
-                        ScaleChanged -= ball.UpdateScale;
-                    }
+              
                     Balls.Clear();
                     Observer.Dispose();
                     ModelLayer.Dispose();
@@ -130,19 +124,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         private double _windowHeight = 600;
 
 
-        private void UpdateBorderSize()
-        {
-            RaisePropertyChanged(nameof(BorderWidth));
-            RaisePropertyChanged(nameof(BorderHeight));
-          
-
-        }
+       
         #endregion private
        
-=======
+
         
-        Disposed = true;
+    
       }
->>>>>>> 2c9cce15e58a29fa485b6995f234ffa9e6fa81f0
     }
-}
