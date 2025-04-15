@@ -27,9 +27,14 @@ namespace TP.ConcurrentProgramming.PresentationView
 
             viewModel.WindowWidth = this.Width;
             viewModel.WindowHeight = this.Height;
-
             
             this.SizeChanged += (s, e) =>
+            {
+                viewModel.WindowWidth = this.ActualWidth;
+                viewModel.WindowHeight = this.ActualHeight;
+            };
+
+            this.StateChanged += (s, e) =>
             {
                 viewModel.WindowWidth = this.ActualWidth;
                 viewModel.WindowHeight = this.ActualHeight;

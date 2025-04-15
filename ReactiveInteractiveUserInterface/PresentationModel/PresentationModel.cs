@@ -82,6 +82,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public override void OnWindowSizeChanged(double width, double height)
         {
+
             if (height < width)
             {
                 ScaleHeight = (height - 200) / UnderneathLayerAPI.GetDimensions.TableHeight;
@@ -115,7 +116,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         private double _scaleHeight = 1;
         private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
         {
-            ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
+            ModelBall newBall = new ModelBall(position.x, position.y, ball);
             ScaleChanged += newBall.NewScaleNotification;
             BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }

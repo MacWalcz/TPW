@@ -28,6 +28,13 @@ namespace TP.ConcurrentProgramming.Data
 
     public IVector Velocity { get; set; }
 
+    public void Contact()
+        {
+            double x = Velocity.x; double y = Velocity.y;
+            Velocity = new Vector(-x, -y);
+            Move();
+        }
+
     #endregion IBall
 
     #region private
@@ -39,9 +46,9 @@ namespace TP.ConcurrentProgramming.Data
       NewPositionNotification?.Invoke(this, Position);
     }
 
-    internal void Move(Vector delta)
+    internal void Move()
     {
-      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
+      Position = new Vector(Position.x + Velocity.x, Position.y + Velocity.y);
       RaiseNewPositionChangeNotification();
     }
 

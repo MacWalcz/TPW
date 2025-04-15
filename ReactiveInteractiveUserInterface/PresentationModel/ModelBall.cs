@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TP.ConcurrentProgramming.BusinessLogic;
 using LogicIBall = TP.ConcurrentProgramming.BusinessLogic.IBall;
+using LogicAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicAbstractAPI;
 
 namespace TP.ConcurrentProgramming.Presentation.Model
 {
@@ -21,38 +22,20 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
         public ModelBall(double top, double left, LogicIBall underneathBall)
         {
-            TopBackingField = top;
-            LeftBackingField = left;
+            LogicalTop = top;
+            LogicalLeft = left;
+            DiameterBackingField = LogicAPI.GetDimensions.BallDimension;
             underneathBall.NewPositionNotification += NewPositionNotification;
         }
 
         #region IBall
 
-        public double Top
-        {
-            get { return TopBackingField; }
-            private set
-            {
-                if (TopBackingField == value)
-                    return;
-                TopBackingField = value * ScaleHeight;
-                RaisePropertyChanged();
-            }
-        }
+        public double Top => LogicalTop * ScaleHeight;
+        public double Left => LogicalLeft * ScaleWidth;
+        public double Diameter => DiameterBackingField * ScaleWidth;
 
-        public double Left
-        {
-            get { return LeftBackingField; }
-            private set
-            {
-                if (LeftBackingField == value)
-                    return;
-                LeftBackingField = value * ScaleWidth;
-                RaisePropertyChanged();
-            }
-        }
 
-        public double Diameter { get; init; } = 0;
+
 
         #region INotifyPropertyChanged
 
@@ -64,21 +47,26 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #region private
 
-        private double TopBackingField;
-        private double LeftBackingField;
-
-        private double ScaleWidth = 1;
-        private double ScaleHeight = 1;
-
+        private double LogicalTop;
+        private double LogicalLeft;
+        private double DiameterBackingField;
+        private double ScaleWidth = 1.0;
+        private double ScaleHeight = 1.0;
         private void NewPositionNotification(object sender, IPosition e)
         {
-            Top = e.y; Left = e.x;
+            LogicalTop = e.y;
+            LogicalLeft = e.x;
+            RaisePropertyChanged(nameof(Top));
+            RaisePropertyChanged(nameof(Left));
         }
 
         public void NewScaleNotification(double width, double height)
         {
             ScaleHeight = height;
             ScaleWidth = width;
+            RaisePropertyChanged(nameof(Top));
+            RaisePropertyChanged(nameof(Left));
+            RaisePropertyChanged(nameof(Diameter));
         }
 
         private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
@@ -92,11 +80,15 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         [Conditional("DEBUG")]
         internal void SetLeft(double x)
-        { Left = x; }
+        {   LogicalLeft = x;
+            RaisePropertyChanged(nameof(Left));
+        }
 
         [Conditional("DEBUG")]
         internal void SettTop(double x)
-        { Top = x; }
+        { LogicalTop = x;
+          RaisePropertyChanged(nameof(Top));
+        }
 
         #endregion testing instrumentation
     }

@@ -31,8 +31,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public abstract void OnWindowSizeChanged(double width, double height);
 
-        
-
         public abstract double ScaleWidth { get; set; }
 
         public abstract double ScaleHeight { get; set; }
