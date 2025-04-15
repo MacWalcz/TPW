@@ -36,7 +36,7 @@ namespace TP.ConcurrentProgramming.PresentationView
             }
             else
             {
-                MessageBox.Show("Podaj prawidłową wartość!(0-15)");
+                MessageBox.Show("Podaj prawidłową wartość!(1-15)");
                 numberOfBalls = 0;
             }
         }
