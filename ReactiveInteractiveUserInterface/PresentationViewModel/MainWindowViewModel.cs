@@ -9,76 +9,134 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
 
 namespace TP.ConcurrentProgramming.Presentation.ViewModel
 {
-  public class MainWindowViewModel : ViewModelBase, IDisposable
-  {
-    #region ctor
-
-    public MainWindowViewModel() : this(null)
-    { }
-
-    internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
+    public class MainWindowViewModel : ViewModelBase, IDisposable
     {
-      ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
-      Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
-    }
+        #region ctor
 
-    #endregion ctor
+        public MainWindowViewModel() : this(null)
+        { }
 
-    #region public API
-
-    public void Start(int numberOfBalls)
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(MainWindowViewModel));
-      ModelLayer.Start(numberOfBalls);
-      Observer.Dispose();
-    }
-
-    public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
-
-    #endregion public API
-
-    #region IDisposable
-
-    protected virtual void Dispose(bool disposing)
-    {
-      if (!Disposed)
-      {
-        if (disposing)
+        internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
         {
-          Balls.Clear();
-          Observer.Dispose();
-          ModelLayer.Dispose();
+            ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
+            Observer = ModelLayer.Subscribe<ModelIBall>(x =>
+            {
+        
+                Balls.Add(x);
+            });  
+        }
+         
+
+        #endregion ctor
+
+        #region public API
+
+        public void Start(int numberOfBalls)
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            ModelLayer.Start(numberOfBalls);
+            Observer.Dispose();
         }
 
-        // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-        // TODO: set large fields to null
-        Disposed = true;
-      }
+        public event Action<double, double> ScaleChanged;
+
+        public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
+
+        public double WindowWidth
+        {
+            get => _windowWidth;
+            set
+            {
+                if (_windowWidth != value)
+                {
+                    _windowWidth = value;
+                    RaisePropertyChanged(nameof(WindowWidth));
+                    RaisePropertyChanged(nameof(ScaleWidth));
+                    UpdateBorderSize();
+                }
+            }
+        }
+
+        public double WindowHeight
+        {
+            get => _windowHeight;
+            set
+            {
+                if (_windowHeight != value)
+                {
+                    _windowHeight = value;
+                    RaisePropertyChanged(nameof(WindowHeight));
+                    RaisePropertyChanged(nameof(ScaleHeight));
+                    UpdateBorderSize();
+                }
+            }
+        }
+
+        public double ScaleWidth => WindowWidth > 0 ? WindowWidth / 1000 : 1;
+        public double ScaleHeight => WindowHeight > 0 ? WindowHeight / 1000 : 1;
+        public double BorderWidth => ScaleWidth * ModelAbstractApi.PresentationDimensions.TableWidth * 4; 
+        public double BorderHeight => ScaleHeight * ModelAbstractApi.PresentationDimensions.TableHeight * 4.2;
+
+        #endregion public API
+
+        #region IDisposable
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!Disposed)
+            {
+                if (disposing)
+                {
+                    foreach (ModelIBall ball in Balls)
+                    {
+                        ScaleChanged -= ball.UpdateScale;
+                    }
+                    Balls.Clear();
+                    Observer.Dispose();
+                    ModelLayer.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                Disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion IDisposable
+
+        #region private
+
+        private IDisposable Observer = null;
+        private ModelAbstractApi ModelLayer;
+        private bool Disposed = false;
+        private double _windowWidth = 800;
+        private double _windowHeight = 600;
+
+
+        private void UpdateBorderSize()
+        {
+            RaisePropertyChanged(nameof(BorderWidth));
+            RaisePropertyChanged(nameof(BorderHeight));
+          
+
+        }
+        #endregion private
+       
     }
-
-    public void Dispose()
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(MainWindowViewModel));
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
-
-    #endregion IDisposable
-
-    #region private
-
-    private IDisposable Observer = null;
-    private ModelAbstractApi ModelLayer;
-    private bool Disposed = false;
-
-    #endregion private
-  }
 }
