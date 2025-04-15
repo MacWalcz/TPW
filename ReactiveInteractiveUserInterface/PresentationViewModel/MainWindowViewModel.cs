@@ -57,8 +57,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
           ModelLayer.Dispose();
         }
 
-        // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-        // TODO: set large fields to null
+        
         Disposed = true;
       }
     }

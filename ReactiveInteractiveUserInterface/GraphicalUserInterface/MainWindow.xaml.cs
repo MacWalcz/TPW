@@ -13,30 +13,51 @@ using TP.ConcurrentProgramming.Presentation.ViewModel;
 
 namespace TP.ConcurrentProgramming.PresentationView
 {
-  /// <summary>
-  /// View implementation
-  /// </summary>
-  public partial class MainWindow : Window
-  {
-    public MainWindow()
-    {
-      Random random = new Random();
-      InitializeComponent();
-      MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
-      double screenWidth = SystemParameters.PrimaryScreenWidth;
-      double screenHeight = SystemParameters.PrimaryScreenHeight;
-      viewModel.Start(random.Next(5, 10));
-    }
-
     /// <summary>
-    /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.
+    /// View implementation
     /// </summary>
-    /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-    protected override void OnClosed(EventArgs e)
+    public partial class MainWindow : Window
     {
-      if (DataContext is MainWindowViewModel viewModel)
-        viewModel.Dispose();
-      base.OnClosed(e);
+
+        public int numberOfBalls { get;  set; }
+        public MainWindow()
+        {
+            InitializeComponent();
+            MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
+
+            var chooser = new BillChooserWindow();
+
+            if (chooser.ShowDialog() == true)
+            {
+                this.numberOfBalls = chooser.numberOfBalls;
+
+
+                MessageBox.Show($"Wybrano {numberOfBalls} bil");
+              
+                if (DataContext is MainWindowViewModel vm)
+                {
+                    vm.Start(numberOfBalls);
+                }
+               
+            }
+            else
+            {
+                Application.Current.Shutdown();
+            }
+        }
+
+        /// <summary>
+        /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.
+        /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
+        protected override void OnClosed(EventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+                viewModel.Dispose();
+            base.OnClosed(e);
+        }
     }
-  }
 }
+
+
+  
