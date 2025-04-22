@@ -24,15 +24,15 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         {
             LogicalTop = top;
             LogicalLeft = left;
-            DiameterBackingField = LogicAPI.GetDimensions.BallDimension;
+            LogicalDiameter = LogicAPI.GetDimensions.BallDimension;
             underneathBall.NewPositionNotification += NewPositionNotification;
         }
 
         #region IBall
 
-        public double Top => LogicalTop * ScaleHeight;
-        public double Left => LogicalLeft * ScaleWidth;
-        public double Diameter => DiameterBackingField * ScaleWidth;
+        public double Top => LogicalTop * Scale;
+        public double Left => LogicalLeft * Scale;
+        public double Diameter => LogicalDiameter * Scale;
 
 
 
@@ -49,9 +49,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         private double LogicalTop;
         private double LogicalLeft;
-        private double DiameterBackingField;
-        private double ScaleWidth = 1.0;
-        private double ScaleHeight = 1.0;
+        private double LogicalDiameter;
+        private double Scale = 1.0;
+      
         private void NewPositionNotification(object sender, IPosition e)
         {
             LogicalTop = e.y;
@@ -60,10 +60,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             RaisePropertyChanged(nameof(Left));
         }
 
-        public void NewScaleNotification(double width, double height)
+        public void NewScaleNotification(double scale)
         {
-            ScaleHeight = height;
-            ScaleWidth = width;
+            Scale = scale;
             RaisePropertyChanged(nameof(Top));
             RaisePropertyChanged(nameof(Left));
             RaisePropertyChanged(nameof(Diameter));

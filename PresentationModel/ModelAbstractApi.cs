@@ -18,6 +18,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         double Top { get; }
         double Left { get; }
         double Diameter { get; }
+
+        void NewScaleNotification(double scale);
+
     }
 
     
@@ -31,10 +34,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public abstract void OnWindowSizeChanged(double width, double height);
 
-        public abstract double ScaleWidth { get; set; }
+        public abstract double Scale { get; set; }
 
-        public abstract double ScaleHeight { get; set; }
-        
         public abstract double BoardWidth { get; }
 
         public abstract double BoardHeight { get; } 

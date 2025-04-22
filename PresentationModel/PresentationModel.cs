@@ -31,7 +31,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #region ModelAbstractApi
 
-        public event Action<double, double> ScaleChanged;
+       
 
         public override void Dispose()
         {
@@ -51,47 +51,36 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             layerBellow.Start(numberOfBalls, StartHandler);
         }
 
-        public override double ScaleWidth
+        public override double Scale
         {
-            get => _scaleWidth;
+            get => _scale;
             set
             {
-                if (_scaleWidth != value)
+                if (_scale != value)
                 {
-                    _scaleWidth = value;
-                    ScaleChanged?.Invoke(ScaleWidth, ScaleHeight);
+                    _scale = value;
+                    ScaleChanged?.Invoke(Scale);
                 }
             }
         }
 
-        public override double ScaleHeight
-        {
-            get => _scaleHeight;
-            set
-            {
-                if (_scaleHeight != value)
-                {
-                    _scaleHeight = value;
-                    ScaleChanged?.Invoke(ScaleWidth, ScaleHeight);
-                }
-            }
-        }
-        public override double BoardHeight => ScaleHeight * UnderneathLayerAPI.GetDimensions.TableHeight;
+       
+        public override double BoardHeight => Scale * UnderneathLayerAPI.GetDimensions.TableHeight;
 
-        public override double BoardWidth => ScaleWidth * UnderneathLayerAPI.GetDimensions.TableWidth;
+        public override double BoardWidth => Scale * UnderneathLayerAPI.GetDimensions.TableWidth;
 
         public override void OnWindowSizeChanged(double width, double height)
         {
 
             if (height < width)
             {
-                ScaleHeight = (height - 200) / UnderneathLayerAPI.GetDimensions.TableHeight;
-                ScaleWidth = ScaleHeight;
+                Scale = (height - 200) / UnderneathLayerAPI.GetDimensions.TableHeight;
+               
             }
             else
             {
-                ScaleWidth = (width - 200) / UnderneathLayerAPI.GetDimensions.TableWidth;
-                ScaleHeight = ScaleWidth;
+                Scale = (width - 200) / UnderneathLayerAPI.GetDimensions.TableWidth;
+              
             }
             
         }
@@ -103,17 +92,16 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #region API
 
-        public event EventHandler<BallChaneEventArgs> BallChanged;
+        internal event EventHandler<BallChaneEventArgs> BallChanged;
 
         #endregion API
 
         #region private
-
+        private event Action<double> ScaleChanged;
         private bool Disposed = false;
         private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
         private readonly UnderneathLayerAPI layerBellow = null;
-        private double _scaleWidth = 1;
-        private double _scaleHeight = 1;
+        private double _scale = 1;
         private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
         {
             ModelBall newBall = new ModelBall(position.x, position.y, ball);
@@ -146,8 +134,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         #endregion TestingInfrastructure
     }
 
-    public class BallChaneEventArgs : EventArgs
+    internal class BallChaneEventArgs : EventArgs
     {
-        public IBall Ball { get; init; }
+        internal IBall Ball { get; init; }
     }
 }
