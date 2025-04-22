@@ -92,7 +92,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         #region API
 
-        internal event EventHandler<BallChaneEventArgs> BallChanged;
+        public override event EventHandler<BallChaneEventArgs> BallChanged;
+
+        private class BallChaneEventArgsImpl : BallChaneEventArgs
+        {
+            public override IBall Ball { get; init; }
+        }
 
         #endregion API
 
@@ -106,7 +111,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         {
             ModelBall newBall = new ModelBall(position.x, position.y, ball);
             ScaleChanged += newBall.NewScaleNotification;
-            BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+            BallChanged?.Invoke(this, new BallChaneEventArgsImpl() { Ball = newBall });
         }
 
         #endregion private
@@ -134,8 +139,5 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         #endregion TestingInfrastructure
     }
 
-    internal class BallChaneEventArgs : EventArgs
-    {
-        internal IBall Ball { get; init; }
-    }
+ 
 }

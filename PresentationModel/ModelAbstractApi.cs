@@ -36,6 +36,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         public abstract double Scale { get; set; }
 
+        public abstract event EventHandler<BallChaneEventArgs> BallChanged;
+
         public abstract double BoardWidth { get; }
 
         public abstract double BoardHeight { get; } 
@@ -55,6 +57,11 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         #region private
 
         private static Lazy<ModelAbstractApi> modelInstance = new Lazy<ModelAbstractApi>(() => new ModelImplementation());
+
+        public abstract class BallChaneEventArgs : EventArgs
+        {
+            public abstract IBall Ball { get; init; }
+        }
 
         #endregion private
     }
