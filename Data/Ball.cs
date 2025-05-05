@@ -10,48 +10,99 @@
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class Ball : IBall
-  {
-    #region ctor
-
-    internal Ball(Vector initialPosition, Vector initialVelocity)
+    internal class Ball : IBall
     {
-      Position = initialPosition;
-      Velocity = initialVelocity;
-    }
+        #region ctor
 
-    #endregion ctor
-
-    #region IBall
-
-    public event EventHandler<IVector>? NewPositionNotification;
-
-    public IVector Velocity { get; set; }
-
-    public void Contact()
+        internal Ball(Vector initialPosition, Vector initialVelocity, double initialMass)
         {
-            double x = Velocity.x; double y = Velocity.y;
-            Velocity = new Vector(-x, -y);
-            Move();
+            Position = initialPosition;
+            Velocity = initialVelocity;
+            Mass = initialMass;
+            velocityLength = Math.Sqrt(Velocity.x * Velocity.x + Velocity.y * Velocity.y);
         }
 
-    #endregion IBall
+        #endregion ctor
 
-    #region private
+        #region IBall
 
-    private Vector Position;
+        public event EventHandler<IVector>? NewPositionNotification;
 
-    private void RaiseNewPositionChangeNotification()
-    {
-      NewPositionNotification?.Invoke(this, Position);
+        public IVector Velocity { get; set; }
+
+        public double Mass { get; init; }
+
+        public void ContactX()
+        {
+            double x = Velocity.x; double y = Velocity.y;
+            lock (_lock)
+            {
+                Velocity = new Vector(-x, y);
+                Move();
+            }
+        }
+
+        public void ContactY()
+        {
+            double x = Velocity.x; double y = Velocity.y;
+            lock (_lock)
+            {
+                Velocity = new Vector(x, -y);
+                Move();
+            }
+        }
+
+        public void ContactBall(IBall otherBall)
+        {
+
+        }
+
+
+        #endregion IBal 
+
+        #region private
+
+        private readonly object _lock = new();
+
+
+        private Vector Position;
+
+        private double velocityLength;
+
+        private volatile bool isMoving = true;
+
+        private void RaiseNewPositionChangeNotification()
+        {
+            NewPositionNotification?.Invoke(this, Position);
+        }
+
+
+        internal void Stop()
+        {
+            isMoving = false;
+        }
+        internal void StartMoving()
+        {
+            new Thread(() =>
+            {
+                while (isMoving)
+                {
+                    Move();
+                    int delay = 500 / (int)velocityLength;
+                    Thread.Sleep(delay);
+                }
+            }).Start();
+        }
+
+        internal void Move()
+        {
+            lock (_lock)
+            {
+                Position = new Vector(Position.x + Velocity.x / velocityLength, Position.y + Velocity.y / velocityLength);
+            }
+            RaiseNewPositionChangeNotification();
+        }
+
+        #endregion private
     }
-
-    internal void Move()
-    {
-      Position = new Vector(Position.x + Velocity.x, Position.y + Velocity.y);
-      RaiseNewPositionChangeNotification();
-    }
-
-    #endregion private
-  }
 }

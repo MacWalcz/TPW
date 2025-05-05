@@ -58,9 +58,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 if (_windowWidth != value)
                 {
                     _windowWidth = value;
+                    
+                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                     RaisePropertyChanged(nameof(BorderWidth));
                     RaisePropertyChanged(nameof(BorderHeight));
-                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                 }
             }
         }
@@ -73,9 +74,10 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 if (_windowHeight != value)
                 {
                     _windowHeight = value;
+                   
+                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                     RaisePropertyChanged(nameof(BorderWidth));
                     RaisePropertyChanged(nameof(BorderHeight));
-                    WindowSizeChanged?.Invoke(WindowWidth, WindowHeight);
                 }
             }
         }

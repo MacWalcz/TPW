@@ -13,51 +13,48 @@ using BisAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicAbstractAPI;
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
-{
-    public Ball(Data.IBall ball)
     {
-        ball.NewPositionNotification += RaisePositionChangeEvent;
-    }
-
-    #region IBall
-
-    public event EventHandler<IPosition>? NewPositionNotification;
-
-    #endregion IBall
-
-    #region private
-
-    private void RaisePositionChangeEvent(object? sender, Data.IVector e)
-    {
-
-        NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
-        if (sender is Data.IBall ball)
+        public Ball(Data.IBall ball)
         {
-            if (BoardContact(e))
+            ball.NewPositionNotification += RaisePositionChangeEvent;
+        }
+
+        #region IBall
+
+        public event EventHandler<IPosition>? NewPositionNotification;
+
+        #endregion IBall
+
+        #region private
+
+        private void RaisePositionChangeEvent(object? sender, Data.IVector e)
+        {
+
+            NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
+            if (sender is Data.IBall ball)
             {
-                    ball.Contact();    
+                double rightBoundary = BisAPI.GetDimensions.TableWidth - BisAPI.GetDimensions.BallDimension - 6;
+                double bottomBoundary = BisAPI.GetDimensions.TableHeight - BisAPI.GetDimensions.BallDimension - 6;
+
+                if (e.x >= rightBoundary || e.x <= 0)
+                {
+                    ball.ContactX();
+
+                }
+                else if (e.y >= bottomBoundary || e.y <= 0)
+                {
+                    ball.ContactY();
+                }
+                else
+                {
+
+                }
             }
+
         }
 
+   
+
+        #endregion private
     }
-
-    private bool BoardContact(Data.IVector e)
-    {
-        double rightBoundary = BisAPI.GetDimensions.TableWidth - BisAPI.GetDimensions.BallDimension;
-        double bottomBoundary = BisAPI.GetDimensions.TableHeight - BisAPI.GetDimensions.BallDimension;
-
-        if (e.x >= rightBoundary || e.y >= bottomBoundary || e.x <= 0 || e.y <= 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-
-
-    }
-
-    #endregion private
-}
 }

@@ -9,6 +9,7 @@
 
 using System;
 using System.Windows;
+using System.Windows.Threading;
 using TP.ConcurrentProgramming.Presentation.ViewModel;
 
 namespace TP.ConcurrentProgramming.PresentationView
@@ -36,8 +37,11 @@ namespace TP.ConcurrentProgramming.PresentationView
 
             this.StateChanged += (s, e) =>
             {
-                viewModel.WindowWidth = this.ActualWidth;
-                viewModel.WindowHeight = this.ActualHeight;
+                Dispatcher.InvokeAsync(() =>
+                {
+                    viewModel.WindowWidth = this.ActualWidth;
+                    viewModel.WindowHeight = this.ActualHeight;
+                }, DispatcherPriority.Loaded);
             };
             var chooser = new BillChooserWindow();
 

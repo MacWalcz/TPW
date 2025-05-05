@@ -79,7 +79,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             }
             else
             {
-                Scale = (width - 200) / UnderneathLayerAPI.GetDimensions.TableWidth;
+                Scale = (width - 400) / UnderneathLayerAPI.GetDimensions.TableWidth;
               
             }
             
