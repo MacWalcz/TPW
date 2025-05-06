@@ -46,7 +46,6 @@ namespace TP.ConcurrentProgramming.Data
 
             }
         }
-
         #endregion DataAbstractAPI
 
         #region IDisposable

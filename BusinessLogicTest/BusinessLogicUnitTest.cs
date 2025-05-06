@@ -118,7 +118,24 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                     throw new NotImplementedException();
                 }
 
-        public event EventHandler<IVector>? NewPositionNotification = null;
+                public void ContactBall(Data.IBall otherBall)
+                {
+                    throw new NotImplementedException();
+                }
+                public void ContactX()
+                {
+                    throw new NotImplementedException();
+                }
+                public void ContactY()
+                {
+                    throw new NotImplementedException();
+                }
+
+                public double Mass { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+
+                
+
+                public event EventHandler<IVector>? NewPositionNotification = null;
       }
     }
 

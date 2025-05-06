@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+
 namespace TP.ConcurrentProgramming.Data.Test
 {
   [TestClass]
@@ -17,20 +18,21 @@ namespace TP.ConcurrentProgramming.Data.Test
     public void ConstructorTestMethod()
     {
       Vector testinVector = new Vector(0.0, 0.0);
-      Ball newInstance = new(testinVector, testinVector);
+      Ball newInstance = new(testinVector, testinVector,1);
     }
 
     [TestMethod]
     public void MoveTestMethod()
     {
       Vector initialPosition = new(10.0, 10.0);
-      Ball newInstance = new(initialPosition, new Vector(0.0, 0.0));
-      IVector curentPosition = new Vector(0.0, 0.0);
+      Ball newInstance = new(initialPosition, new Vector(0.0, 1.0),1);
+      IVector curentPosition = new Vector(10.0, 11.0);
       int numberOfCallBackCalled = 0;
-      newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
+      Vector Expected = new(10.0, 11.0);
+            newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
       newInstance.Move();
       Assert.AreEqual<int>(1, numberOfCallBackCalled);
-      Assert.AreEqual<IVector>(initialPosition, curentPosition);
+      Assert.AreEqual<IVector>(Expected, curentPosition);
     }
   }
 }
