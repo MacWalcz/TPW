@@ -20,7 +20,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 {
     internal class ModelBall : IBall
     {
-        public ModelBall(double top, double left, LogicIBall underneathBall)
+        internal ModelBall(double top, double left, LogicIBall underneathBall)
         {
             LogicalTop = top;
             LogicalLeft = left;

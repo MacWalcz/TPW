@@ -26,13 +26,13 @@ namespace TP.ConcurrentProgramming.Data.Test
     {
       Vector initialPosition = new(10.0, 10.0);
       Ball newInstance = new(initialPosition, new Vector(0.0, 1.0),1);
-      IVector curentPosition = new Vector(10.0, 11.0);
+      Vector curentPosition = new Vector(10.0, 11.0);
       int numberOfCallBackCalled = 0;
       Vector Expected = new(10.0, 11.0);
             newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
       newInstance.Move();
       Assert.AreEqual<int>(1, numberOfCallBackCalled);
-      Assert.AreEqual<IVector>(Expected, curentPosition);
+      Assert.AreEqual<Vector>(Expected, curentPosition);
     }
   }
 }

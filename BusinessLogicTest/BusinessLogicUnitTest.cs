@@ -67,7 +67,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
@@ -82,7 +82,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         Disposed = true;
       }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
@@ -96,46 +96,27 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
       {
         StartCalled = true;
         NumberOfBallseCreated = numberOfBalls;
-        upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
+        upperLayerHandler(new Vector(0,0), new DataBallFixture());
       }
 
-      private record DataVectorFixture : Data.IVector
-      {
-        public double x { get; init; }
-        public double y { get; init; }
-      }
+     
+
+
 
       private class DataBallFixture : Data.IBall
       {
-        public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Vector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         
-                public void Contact()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public void ContactBall(Data.IBall otherBall)
-                {
-                    throw new NotImplementedException();
-                }
-                public void ContactX()
-                {
-                    throw new NotImplementedException();
-                }
-                public void ContactY()
-                {
-                    throw new NotImplementedException();
-                }
+                
 
                 public double Mass { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
 
-                
-
-                public event EventHandler<IVector>? NewPositionNotification = null;
+                public Vector Position { get; }
+                public event EventHandler<Vector>? NewPositionNotification = null;
       }
     }
 

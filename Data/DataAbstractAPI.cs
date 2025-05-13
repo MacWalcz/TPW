@@ -23,7 +23,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region public API
 
-        public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
+        public abstract void Start(int numberOfBalls, Action<Vector, IBall> upperLayerHandler);
 
         #endregion public API
 
@@ -40,32 +40,17 @@ namespace TP.ConcurrentProgramming.Data
         #endregion private
     }
 
-    public interface IVector
-    {
-        /// <summary>
-        /// The X component of the vector.
-        /// </summary>
-        double x { get; init; }
-
-        /// <summary>
-        /// The y component of the vector.
-        /// </summary>
-        double y { get; init; }
-    }
+    public record Vector(double x, double y);
 
     public interface IBall
     {
-        event EventHandler<IVector> NewPositionNotification;
+        event EventHandler<Vector> NewPositionNotification;
 
-        IVector Velocity { get; set; }
+        Vector Velocity { get; set; }
+
+        Vector Position { get;}
 
         double Mass { get; }
-
-        void ContactX();
-
-        void ContactY();
-
-        void ContactBall(IBall otherBall);
 
     }
 }

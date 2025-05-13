@@ -9,7 +9,9 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Collections.Concurrent;
+using System.Numerics;
 using System.Reflection;
+using System.Xml.Serialization;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
 {
@@ -33,13 +35,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             data.NewMove(10, 50);
 
-            data.Velocity = new VectorFixture(-3, 5);
+            data.Velocity = new Data.Vector(-3, 5);
 
             // Act
             data.NewMove(0, 100);  
 
             // Assert
-            Assert.IsTrue(data.ContactXCalled, "ContactX() powinno zostać wywołane w warstwie danych");
             Assert.AreEqual(3, data.Velocity.x, "X powinno się odwrócić");
             Assert.AreEqual(5, data.Velocity.y, "Y powinno pozostać bez zmian");
         }
@@ -52,44 +53,48 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             data.NewMove(50, 50);
 
-            data.Velocity = new VectorFixture(4, -7);
+            data.Velocity = new Data.Vector(4, -7);
 
             data.NewMove(100, 0);  
 
-            Assert.IsTrue(data.ContactYCalled, "ContactY() powinno zostać wywołane w warstwie danych");
+            
             Assert.AreEqual(4, data.Velocity.x, "X powinno pozostać bez zmian");
             Assert.AreEqual(7, data.Velocity.y, "Y powinno się odwrócić");
         }
 
         [TestMethod]
-        public void WhenTwoBallsOverlap_ShouldCallDataContactBallOnceOnA()
+        public void CollisionTest()
         {
-            var dataA = new DataBallFixture();
-            var dataB = new DataBallFixture();
-            var bA = new Ball(dataA);
-            var bB = new Ball(dataB);
+            
+            var ball1 = new DataBallFixture();
+            var ball2 = new DataBallFixture();
 
-            dataA.NewMove(0, 0);
-            dataB.NewMove(15, 0);
+           
+            ball1.Position = new Data.Vector(49, 50);
+            ball1.Velocity = new Data.Vector(1, 0);
 
-            ClearCollisionDictionary();
+            
+            
+            ball2.Position = new Data.Vector(51, 50); 
+            ball2.Velocity = new Data.Vector(-1, 0);
+           
+            var businessBall = new Ball(ball1);
+            var businessBall2 = new Ball(ball2);
 
-            dataA.ResetContactCount();
-            dataB.ResetContactCount();
+            Ball.Balls.Clear(); 
+            Ball.Balls.Add(businessBall);
+            Ball.Balls.Add(businessBall2);
 
-            dataA.Velocity = new VectorFixture(5, 0);
-            dataB.Velocity = new VectorFixture(0, 0);
-            dataA.NewMove(1, 0);
+            ball1.NewMove(50,50);
 
-            Assert.AreEqual(1, dataA.ContactBallCallCount);
-            Assert.AreEqual(0, dataB.ContactBallCallCount);
-        }
+            ball2.NewMove(51, 50);
 
-        private void ClearCollisionDictionary()
-        {
-            var dictField = typeof(Ball).GetField("InCollision", BindingFlags.NonPublic | BindingFlags.Static);
-            var dict = (ConcurrentDictionary<(int, int), bool>)dictField.GetValue(null)!;
-            dict.Clear();
+            ball1.NewMove(50, 50);
+
+
+            Assert.AreNotEqual(1, ball1.Velocity.x, "Ball1 should change direction");
+            Assert.AreNotEqual(-1, ball2.Velocity.x, "Ball2 should change direction");
+
         }
 
 
@@ -97,48 +102,20 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
         private class DataBallFixture : Data.IBall
         {
-            public Data.IVector Velocity { get; set; } = new VectorFixture(0, 0);
+            public Data.Vector Velocity { get; set; } = new Data.Vector(0, 0);
             public double Mass { get; init; } = 1.0;
 
-            public event EventHandler<Data.IVector>? NewPositionNotification;
+            public Data.Vector Position { get; set; }
 
-            public bool ContactXCalled { get; private set; }
-            public bool ContactYCalled { get; private set; }
-            public int ContactBallCallCount { get; private set; }
+            public event EventHandler<Data.Vector>? NewPositionNotification;
 
             public void NewMove(double x, double y)
-                => NewPositionNotification?.Invoke(this, new VectorFixture(x, y));
+                => NewPositionNotification?.Invoke(this, new Data.Vector(x, y));
 
-            void Data.IBall.ContactX()
-            {
-                ContactXCalled = true;
-                Velocity = new VectorFixture(-Velocity.x, Velocity.y);
-            }
-
-            void Data.IBall.ContactY()
-            {
-                ContactYCalled = true;
-                Velocity = new VectorFixture(Velocity.x, -Velocity.y);
-            }
-
-            void Data.IBall.ContactBall(Data.IBall other)
-            {
-                ContactBallCallCount++;
-                Velocity = new VectorFixture(-Velocity.x, -Velocity.y);
-            }
-            public void ResetContactCount() => ContactBallCallCount = 0;
+           
 
         }
-        private class VectorFixture : Data.IVector
-        {
-            internal VectorFixture(double X, double Y)
-            {
-                x = X; y = Y;
-            }
-
-            public double x { get; init; }
-            public double y { get; init; }
-        }
+        
 
         #endregion testing instrumentation
     }
