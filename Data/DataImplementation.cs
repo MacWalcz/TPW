@@ -27,7 +27,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region DataAbstractAPI
 
-        public override void Start(int numberOfBalls, Action<Vector, IBall> upperLayerHandler)
+        public override void Start(int numberOfBalls, Action<Vector, IBall,object> upperLayerHandler)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(DataImplementation));
@@ -36,9 +36,10 @@ namespace TP.ConcurrentProgramming.Data
             Random random = new Random();
             for (int i = 0; i < numberOfBalls; i++)
             {
+                object LockObject = new();
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                Ball newBall = new(startingPosition,startingPosition, 20);
-                upperLayerHandler(startingPosition, newBall);
+                Ball newBall = new(startingPosition,startingPosition, 20,LockObject);
+                upperLayerHandler(startingPosition, newBall,LockObject);
                 BallsList.Add(newBall);
                 newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 100, (RandomGenerator.NextDouble() - 0.5) * 100);
                 newBall.StartMoving();

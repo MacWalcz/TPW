@@ -16,12 +16,13 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
-        internal Ball(Vector initialPosition, Vector initialVelocity, double initialMass)
+        internal Ball(Vector initialPosition, Vector initialVelocity, double initialMass, object Lock)
         {
             _position = initialPosition;
             Velocity = initialVelocity;
             Mass = initialMass;
             velocityLength = Math.Sqrt(Velocity.x * Velocity.x + Velocity.y * Velocity.y);
+            _Lock = Lock;
         }
 
         #endregion ctor
@@ -34,17 +35,15 @@ namespace TP.ConcurrentProgramming.Data
         {
             get
             {
-                lock (_velocityLock)
-                {
+                
                     return _velocity;
-                }
+                
             }
             set
             {
-                lock (_velocityLock)
-                {
+               
                     _velocity = value;
-                }
+               
             }
         }
 
@@ -52,17 +51,15 @@ namespace TP.ConcurrentProgramming.Data
         {
             get
             {
-                lock (_positionLock)
-                {
+                
                     return _position;
-                }
+                
             }
             private set
             {
-                lock (_positionLock)
-                {
+                
                     _position = value;
-                }
+                
             }
         }
 
@@ -73,9 +70,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
-        private readonly object _velocityLock = new();
-
-        private readonly object _positionLock = new();
+        private readonly object _Lock;
 
         private Vector _velocity;
 
@@ -110,8 +105,10 @@ namespace TP.ConcurrentProgramming.Data
 
         internal void Move()
         {
-
-            Position = new Vector(Position.x + Velocity.x / velocityLength, Position.y + Velocity.y / velocityLength);
+            lock (_Lock)
+            {
+                Position = new Vector(Position.x + Velocity.x / velocityLength, Position.y + Velocity.y / velocityLength);
+            }
             RaiseNewPositionChangeNotification();
         }
 

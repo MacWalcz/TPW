@@ -10,6 +10,7 @@
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using BisAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -23,11 +24,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly int _hash;
         private Position _currentPosition;
         
-        internal Ball(Data.IBall ball)
+        internal Ball(Data.IBall ball, object Lock)
         {
             _inner = ball; // Inicjalizacja referencji do obiektu kulki
             _hash = RuntimeHelpers.GetHashCode(this); // Obliczanie hasha kulki do identyfikacji w kolizji
             Balls.Add(this); // Dodanie kulki do kolekcji
+            _lock = Lock;
             ball.NewPositionNotification += RaisePositionChangeEvent;
         }
 
@@ -38,80 +40,94 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #endregion IBall
 
         #region private
-
+        private object _lock;
         private void RaisePositionChangeEvent(object? sender, Data.Vector e)
         {
-            _currentPosition = new Position(e.x, e.y);
+            
+                _currentPosition = new Position(e.x, e.y);
 
-            NewPositionNotification?.Invoke(this, _currentPosition);
-            if (sender is Data.IBall ball)
-            {
-
-                double rightBoundary = BisAPI.GetDimensions.TableWidth - BisAPI.GetDimensions.BallDimension - 6;
-                double bottomBoundary = BisAPI.GetDimensions.TableHeight - BisAPI.GetDimensions.BallDimension - 6;
-                
-
-                if (e.x >= rightBoundary || e.x <= 0)
+                NewPositionNotification?.Invoke(this, _currentPosition);
+                if (sender is Data.IBall ball)
                 {
-                    double x = ball.Velocity.x;
-                    double y = ball.Velocity.y;
-                    ball.Velocity = new Data.Vector(-x, y);
-                }
-                else if (e.y >= bottomBoundary || e.y <= 0)
-                {
-                    double x = ball.Velocity.x;
-                    double y = ball.Velocity.y;
-                    ball.Velocity = new Data.Vector(x, -y);
-                }
 
-                double diameter = BisAPI.GetDimensions.BallDimension; // średnica kulki
-                double collidsionDistance = diameter * diameter; // odległość kolizji
+                    double rightBoundary = BisAPI.GetDimensions.TableWidth - BisAPI.GetDimensions.BallDimension - 6;
+                    double bottomBoundary = BisAPI.GetDimensions.TableHeight - BisAPI.GetDimensions.BallDimension - 6;
 
-                Parallel.ForEach(Balls, other => // iteracja po wszystkich kulach
+
+                    if (e.x >= rightBoundary || e.x <= 0)
                     {
-                        if (ReferenceEquals(this, other)) return; // jeżeli to ta sama kulka to pomijamy
+                    lock (_lock)
+                    {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
+                        ball.Velocity = new Data.Vector(-x, y);
+                    }
+                    }
+                    else if (e.y >= bottomBoundary || e.y <= 0)
+                    {
+                    lock (_lock)
+                    {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
+                        ball.Velocity = new Data.Vector(x, -y);
+                    }
+                    }
 
-                        if (other._currentPosition is null) return; // Jeżeli pozycja kulki jest null to pomijamy
+                    double diameter = BisAPI.GetDimensions.BallDimension; // średnica kulki
+                    double collidsionDistance = diameter * diameter; // odległość kolizji
 
-                        var key = _hash < other._hash ? (_hash, other._hash) : (other._hash, _hash); // tworzenie klucza do Dictionary
-                        double dx = e.x - other._currentPosition.x; // obliczanie odległości
-                        double dy = e.y - other._currentPosition.y; 
-                        double distSq = dx * dx + dy * dy; // kwadrat odległości
-
-                        if (distSq < collidsionDistance) // jeżeli odległość jest mniejsza od średnicy kulki to sprawdzamy kolizję
+                    Parallel.ForEach(Balls, other => // iteracja po wszystkich kulach
                         {
-                            if (InCollision.TryAdd(key, true)) // dodajemy do Dictionary
+                            if (ReferenceEquals(this, other)) return; // jeżeli to ta sama kulka to pomijamy
+
+                            if (other._currentPosition is null) return; // Jeżeli pozycja kulki jest null to pomijamy
+                            
+
+                            int h1 = RuntimeHelpers.GetHashCode(this); // Aby uniknąć zakleszczenia ustawiamy kolejność blokad na podstawie hashcode'ów
+                            int h2 = RuntimeHelpers.GetHashCode(other);
+                            Ball first = h1 < h2 ? this : other;
+                            Ball second = first == this ? other : this;
+                            lock (first._lock)
                             {
-                                ContactBall(_inner,other._inner); 
+                                lock (second._lock)
+                                {
+                                    var key = _hash < other._hash ? (_hash, other._hash) : (other._hash, _hash); // tworzenie klucza do Dictionary
+                                    double dx = e.x - other._currentPosition.x; // obliczanie odległości
+                                    double dy = e.y - other._currentPosition.y;
+                                    double distSq = dx * dx + dy * dy; // kwadrat odległości
+
+                                    if (distSq < collidsionDistance) // jeżeli odległość jest mniejsza od średnicy kulki to sprawdzamy kolizję
+                                    {
+                                        if (InCollision.TryAdd(key, true)) // dodajemy do Dictionary
+                                        {
+
+                                            ContactBall(this, other);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        InCollision.TryRemove(key, out _); // jeżeli kulki się nie stykają to usuwamy z Dictionary
+                                    }
+                                }
                             }
-                        }
-                        else
-                        {
-                            InCollision.TryRemove(key, out _); // jeżeli kulki się nie stykają to usuwamy z Dictionary
-                        }
-                    });
-            }
+                        });
+                }
+            
 
         }
-        private void ContactBall(Data.IBall innerBall,Data.IBall otherBall)
+        private void ContactBall(Ball firstBall,Ball otherBall)
         {
-            if (innerBall == null || otherBall == null)
-                throw new ArgumentNullException("Ball passed to ContactBall was null.");
+            
 
-            int h1 = RuntimeHelpers.GetHashCode(innerBall); // Aby uniknąć zakleszczenia ustawiamy kolejność blokad na podstawie hashcode'ów
-            int h2 = RuntimeHelpers.GetHashCode(otherBall);
-            var first = h1 < h2 ? innerBall : otherBall;
-            var second = first == innerBall ? otherBall : innerBall;
+    
 
-           
-                
-                    var posA = innerBall.Position; // Pobieramy pozycje obu kul
-                    var posB = otherBall.Position;
-                    var velA = innerBall.Velocity;
-                    var velB = otherBall.Velocity;
-
-                    double mA = innerBall.Mass; // Masy każdej kuli i współczynnik sprężystości (e = 1 = idealnie sprężyste)
-                    double mB = otherBall.Mass;
+                    var posA = firstBall._inner.Position; // Pobieramy pozycje obu kul
+                    var posB = otherBall._inner.Position;
+                    var velA = firstBall._inner.Velocity;
+                    var velB = otherBall._inner.Velocity;
+                    
+                    double mA = firstBall._inner.Mass; // Masy każdej kuli i współczynnik sprężystości (e = 1 = idealnie sprężyste)
+                    double mB = otherBall._inner.Mass;
                     double e = 1.0;
 
                     double dx = posA.x - posB.x; // Obliczamy wektor od środka B do środka A i jego długość
@@ -135,9 +151,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                     velA = new Data.Vector(velA.x + ix / mA, velA.y + iy / mA); // Aktualizujemy prędkości obu kul:
                     velB = new Data.Vector(velB.x - ix / mB, velB.y - iy / mB); // vA' = vA + (j/mA)*n,  vB' = vB - (j/mB)*n
-                    innerBall.Velocity = velA;
-                    otherBall.Velocity = velB;
-
+                    firstBall._inner.Velocity = velA;
+                    otherBall._inner.Velocity = velB;
+                
                    
                 }
 
