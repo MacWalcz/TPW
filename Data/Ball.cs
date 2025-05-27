@@ -8,6 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace TP.ConcurrentProgramming.Data
@@ -35,15 +36,15 @@ namespace TP.ConcurrentProgramming.Data
         {
             get
             {
-                
-                    return _velocity;
-                
+
+                return _velocity;
+
             }
             set
             {
-               
-                    _velocity = value;
-               
+
+                _velocity = value;
+
             }
         }
 
@@ -51,15 +52,15 @@ namespace TP.ConcurrentProgramming.Data
         {
             get
             {
-                
-                    return _position;
-                
+
+                return _position;
+
             }
             private set
             {
-                
-                    _position = value;
-                
+
+                _position = value;
+
             }
         }
 
@@ -94,20 +95,26 @@ namespace TP.ConcurrentProgramming.Data
         {
             new Thread(() =>
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                double previousTime = stopwatch.Elapsed.TotalSeconds;
                 while (isMoving)
                 {
-                    Move();
-                    int delay = 500 / (int)velocityLength;
-                    Thread.Sleep(delay);
+                    double currentTime = stopwatch.Elapsed.TotalSeconds;
+                    double deltaTime = currentTime - previousTime;
+                    previousTime = currentTime;
+                    Move(deltaTime);
+
                 }
             }).Start();
         }
 
-        internal void Move()
+        internal void Move(double deltaTime)
         {
             lock (_Lock)
             {
-                Position = new Vector(Position.x + Velocity.x / velocityLength, Position.y + Velocity.y / velocityLength);
+                Position = new Vector(Position.x + Velocity.x * deltaTime,
+                                     Position.y + Velocity.y * deltaTime
+                                     );
             }
             RaiseNewPositionChangeNotification();
         }

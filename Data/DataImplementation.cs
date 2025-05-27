@@ -41,7 +41,7 @@ namespace TP.ConcurrentProgramming.Data
                 Ball newBall = new(startingPosition,startingPosition, 20,LockObject);
                 upperLayerHandler(startingPosition, newBall,LockObject);
                 BallsList.Add(newBall);
-                newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 100, (RandomGenerator.NextDouble() - 0.5) * 100);
+                newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 150, (RandomGenerator.NextDouble() - 0.5) * 150);
                 newBall.StartMoving();
 
 
