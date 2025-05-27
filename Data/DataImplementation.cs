@@ -10,6 +10,7 @@
 
 using System;
 using System.Diagnostics;
+using TP.ConcurrentProgramming.Data.Diagnostics;
 
 
 namespace TP.ConcurrentProgramming.Data
@@ -18,9 +19,16 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
+        private readonly IDiagnosticSerializer<BallDiagnosticData> _serializer;
+        private readonly FileDiagnosticWriter _writer;
+        private readonly List<Ball> BallsList = new();
+        private bool Disposed = false;
+
         public DataImplementation()
         {
-
+            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ball_diagnostics.log");
+            _serializer = new AsciiDiagnosticSerializer();
+            _writer = new FileDiagnosticWriter(logPath);
         }
 
         #endregion ctor
@@ -39,6 +47,27 @@ namespace TP.ConcurrentProgramming.Data
                 object LockObject = new();
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                 Ball newBall = new(startingPosition,startingPosition, 20,LockObject);
+
+                newBall.NewPositionNotification += (sender, position) =>
+                {
+                    Ball b = (Ball)sender;
+                    var data = new BallDiagnosticData
+                    (
+                        b.Id,
+                        DateTime.UtcNow,
+                        b.Position.x,
+                        b.Position.y,
+                        b.Velocity.x,
+                        b.Velocity.y
+                    );
+
+                    var line = _serializer.Serialize(data);
+
+                    if(!_writer.Enqueue(line))
+                    {
+                        Debug.WriteLine($"[Diagnostics] bufor pełny, porzucono wpis kulki #{b.Id}");
+                    }
+                };
                 upperLayerHandler(startingPosition, newBall,LockObject);
                 BallsList.Add(newBall);
                 newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 150, (RandomGenerator.NextDouble() - 0.5) * 150);
@@ -62,6 +91,8 @@ namespace TP.ConcurrentProgramming.Data
                         ball.Stop(); 
                     }
                     BallsList.Clear();
+
+                    _writer.Dispose();
                 }
                 Disposed = true;
             }
@@ -81,11 +112,9 @@ namespace TP.ConcurrentProgramming.Data
         #region private
 
         //private bool disposedValue;
-        private bool Disposed = false;
 
 
         private Random RandomGenerator = new();
-        private List<Ball> BallsList = [];
 
 
         #endregion private

@@ -17,8 +17,11 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
+        private static int _nextId = 0;
+        public int Id { get; } = Interlocked.Increment(ref _nextId);
         internal Ball(Vector initialPosition, Vector initialVelocity, double initialMass, object Lock)
         {
+            Id = Id;
             _position = initialPosition;
             Velocity = initialVelocity;
             Mass = initialMass;
