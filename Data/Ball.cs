@@ -113,9 +113,13 @@ namespace TP.ConcurrentProgramming.Data
                 Position = new Vector(Position.x + Velocity.x * deltaTime,
                                      Position.y + Velocity.y * deltaTime
                                      );
+               
             }
             RaiseNewPositionChangeNotification();
+
         }
+
+
 
         #endregion private
     }

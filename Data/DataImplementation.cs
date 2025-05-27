@@ -54,7 +54,9 @@ namespace TP.ConcurrentProgramming.Data
 
                 newBall.NewPositionNotification += (sender, position) =>
                 {
+                    
                     Ball b = (Ball)sender;
+                   
                     var data = new BallDiagnosticData
                     (
                         b.Id,

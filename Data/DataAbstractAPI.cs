@@ -50,6 +50,7 @@ namespace TP.ConcurrentProgramming.Data
 
         Vector Position { get;}
 
+        public int Id { get; }
         double Mass { get; }
 
     }
