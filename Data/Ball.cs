@@ -48,6 +48,15 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
+        internal (Vector position, Vector velocity) GetSnapshot()
+        {
+            lock (_Lock)
+            {
+                return (Position, Velocity);
+            }
+        }
+
+
         public Vector Position
         {
             get
@@ -113,13 +122,9 @@ namespace TP.ConcurrentProgramming.Data
                 Position = new Vector(Position.x + Velocity.x * deltaTime,
                                      Position.y + Velocity.y * deltaTime
                                      );
-               
             }
             RaiseNewPositionChangeNotification();
-
         }
-
-
 
         #endregion private
     }

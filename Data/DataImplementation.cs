@@ -54,17 +54,18 @@ namespace TP.ConcurrentProgramming.Data
 
                 newBall.NewPositionNotification += (sender, position) =>
                 {
-                    
                     Ball b = (Ball)sender;
-                   
+
+                    var(pos,vel) = b.GetSnapshot();
+
                     var data = new BallDiagnosticData
                     (
                         b.Id,
                         DateTime.UtcNow,
-                        b.Position.x,
-                        b.Position.y,
-                        b.Velocity.x,
-                        b.Velocity.y
+                        pos.x,
+                        pos.y,
+                        vel.x,
+                        vel.y
                     );
 
                     var line = _serializer.Serialize(data);
