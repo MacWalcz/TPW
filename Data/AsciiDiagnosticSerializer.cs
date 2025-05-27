@@ -4,16 +4,11 @@ namespace TP.ConcurrentProgramming.Data.Diagnostics
 {
     internal class AsciiDiagnosticSerializer : IDiagnosticSerializer<BallDiagnosticData>
     {
-        public string Serialize(BallDiagnosticData d)
+        public string Serialize(BallDiagnosticData data)
         {
-            return string.Join(';',
-                d.Timestamp.ToString("o", CultureInfo.InvariantCulture),
-                d.BallId,
-                d.X.ToString("F3", CultureInfo.InvariantCulture),
-                d.Y.ToString("F3", CultureInfo.InvariantCulture),
-                d.Vx.ToString("F3", CultureInfo.InvariantCulture),
-                d.Vy.ToString("F3", CultureInfo.InvariantCulture)
-            );
+            string timestamp = data.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff");
+            return $"{timestamp} | [Data] BallId: {data.BallId}  position: ({data.X.ToString("F3", CultureInfo.InvariantCulture)}, {data.Y.ToString("F3", CultureInfo.InvariantCulture)}), " +
+                   $"velocity: ({data.Vx.ToString("F3", CultureInfo.InvariantCulture)}, {data.Vy.ToString("F3", CultureInfo.InvariantCulture)})";
         }
     }
 }

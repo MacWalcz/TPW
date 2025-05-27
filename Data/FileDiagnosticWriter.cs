@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
+﻿using System.Collections.Concurrent;
 using System.Text;
-using System.Threading;
 
 namespace TP.ConcurrentProgramming.Data.Diagnostics
 {
@@ -17,7 +14,7 @@ namespace TP.ConcurrentProgramming.Data.Diagnostics
         {
             _queue = new BlockingCollection<string>(maxBuffer);
             _sw = new StreamWriter(path, append: true, encoding: Encoding.ASCII)
-            { AutoFlush = false };
+            { AutoFlush = true };
 
             _worker = new Thread(() => Consume(_cts.Token))
             {

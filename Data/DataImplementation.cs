@@ -8,7 +8,6 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using System;
 using System.Diagnostics;
 using TP.ConcurrentProgramming.Data.Diagnostics;
 
@@ -23,12 +22,16 @@ namespace TP.ConcurrentProgramming.Data
         private readonly FileDiagnosticWriter _writer;
         private readonly List<Ball> BallsList = new();
         private bool Disposed = false;
+        private readonly string _logPath;
+        private Random RandomGenerator = new();
+
 
         public DataImplementation()
         {
-            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ball_diagnostics.log");
+            _logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ball_diagnostics.log");
+
             _serializer = new AsciiDiagnosticSerializer();
-            _writer = new FileDiagnosticWriter(logPath);
+            _writer = new FileDiagnosticWriter(_logPath);
         }
 
         #endregion ctor
@@ -44,9 +47,10 @@ namespace TP.ConcurrentProgramming.Data
             Random random = new Random();
             for (int i = 0; i < numberOfBalls; i++)
             {
+                int id = i + 1;
                 object LockObject = new();
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                Ball newBall = new(startingPosition,startingPosition, 20,LockObject);
+                Ball newBall = new(id,startingPosition,startingPosition, 20,LockObject);
 
                 newBall.NewPositionNotification += (sender, position) =>
                 {
@@ -67,6 +71,7 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         Debug.WriteLine($"[Diagnostics] bufor pełny, porzucono wpis kulki #{b.Id}");
                     }
+
                 };
                 upperLayerHandler(startingPosition, newBall,LockObject);
                 BallsList.Add(newBall);
@@ -112,10 +117,6 @@ namespace TP.ConcurrentProgramming.Data
         #region private
 
         //private bool disposedValue;
-
-
-        private Random RandomGenerator = new();
-
 
         #endregion private
 

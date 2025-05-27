@@ -8,10 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 using System.Collections.Concurrent;
-using System.ComponentModel.Design;
-using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using BisAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -54,20 +51,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 double rightBoundary = BisAPI.GetDimensions.TableWidth - BisAPI.GetDimensions.BallDimension - 6;
                 double bottomBoundary = BisAPI.GetDimensions.TableHeight - BisAPI.GetDimensions.BallDimension - 6;
 
-                double x = ball.Velocity.x;
-                double y = ball.Velocity.y;
+
                 if (e.x >= rightBoundary)
                 {
                     lock (_lock)
                     {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
                         ball.Velocity = new Data.Vector(-Math.Abs(x), y);
                     }
 
                 }
-                else if (e.x <=0)
+                else if (e.x <= 0)
                 {
                     lock (_lock)
                     {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
                         ball.Velocity = new Data.Vector(Math.Abs(x), y);
                     }
                 }
@@ -75,13 +75,17 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 {
                     lock (_lock)
                     {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
                         ball.Velocity = new Data.Vector(x, -Math.Abs(y));
                     }
                 }
                 else if (e.y <= 0)
                 {
                     lock (_lock)
-                    {   
+                    {
+                        double x = ball.Velocity.x;
+                        double y = ball.Velocity.y;
                         ball.Velocity = new Data.Vector(x, Math.Abs(y));
                     }
                 }
@@ -90,44 +94,45 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 double collidsionDistance = diameter * diameter; // odległość kolizji
 
                 Parallel.ForEach(Balls, other => // iteracja po wszystkich kulach
+                {
+                    if (ReferenceEquals(this, other)) return; // jeżeli to ta sama kulka to pomijamy
+
+                    if (other._currentPosition is null) return; // Jeżeli pozycja kulki jest null to pomijamy
+
+
+                    int h1 = RuntimeHelpers.GetHashCode(this); // Aby uniknąć zakleszczenia ustawiamy kolejność blokad na podstawie hashcode'ów
+                    int h2 = RuntimeHelpers.GetHashCode(other);
+                    Ball first = h1 < h2 ? this : other;
+                    Ball second = first == this ? other : this;
+                    lock (first._lock)
                     {
-                        if (ReferenceEquals(this, other)) return; // jeżeli to ta sama kulka to pomijamy
-
-                        if (other._currentPosition is null) return; // Jeżeli pozycja kulki jest null to pomijamy
-
-
-                        int h1 = RuntimeHelpers.GetHashCode(this); // Aby uniknąć zakleszczenia ustawiamy kolejność blokad na podstawie hashcode'ów
-                        int h2 = RuntimeHelpers.GetHashCode(other);
-                        Ball first = h1 < h2 ? this : other;
-                        Ball second = first == this ? other : this;
-                        lock (first._lock)
+                        lock (second._lock)
                         {
-                            lock (second._lock)
+                            var key = (first._hash, second._hash); // tworzenie klucza do Dictionary
+                            double dx = e.x - other._currentPosition.x; // obliczanie odległości
+                            double dy = e.y - other._currentPosition.y;
+                            double distSq = dx * dx + dy * dy; // kwadrat odległości
+
+                            if (distSq < collidsionDistance) // jeżeli odległość jest mniejsza od średnicy kulki to sprawdzamy kolizję
                             {
-                                var key = _hash < other._hash ? (_hash, other._hash) : (other._hash, _hash); // tworzenie klucza do Dictionary
-                                double dx = e.x - other._currentPosition.x; // obliczanie odległości
-                                double dy = e.y - other._currentPosition.y;
-                                double distSq = dx * dx + dy * dy; // kwadrat odległości
-
-                                if (distSq < collidsionDistance) // jeżeli odległość jest mniejsza od średnicy kulki to sprawdzamy kolizję
+                                if (InCollision.TryAdd(key, true)) // dodajemy do Dictionary
                                 {
-                                    if (InCollision.TryAdd(key, true)) // dodajemy do Dictionary
-                                    {
 
-                                        ContactBall(this, other);
-                                    }
-                                }
-                                else
-                                {
-                                    InCollision.TryRemove(key, out _); // jeżeli kulki się nie stykają to usuwamy z Dictionary
+                                    ContactBall(this, other);
                                 }
                             }
+                            else
+                            {
+                                InCollision.TryRemove(key, out _); // jeżeli kulki się nie stykają to usuwamy z Dictionary
+                            }
                         }
-                    });
+                    }
+                });
             }
-
-
         }
+
+
+        
         private void ContactBall(Ball firstBall, Ball otherBall)
         {
 

@@ -9,7 +9,6 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -17,15 +16,13 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region ctor
 
-        private static int _nextId = 0;
-        public int Id { get; } = Interlocked.Increment(ref _nextId);
-        internal Ball(Vector initialPosition, Vector initialVelocity, double initialMass, object Lock)
+        public int Id { get; }
+        internal Ball(int id, Vector initialPosition, Vector initialVelocity, double initialMass, object Lock)
         {
-            Id = Id;
+            Id = id;
             _position = initialPosition;
             Velocity = initialVelocity;
             Mass = initialMass;
-            velocityLength = Math.Sqrt(Velocity.x * Velocity.x + Velocity.y * Velocity.y);
             _Lock = Lock;
         }
 
@@ -79,8 +76,6 @@ namespace TP.ConcurrentProgramming.Data
         private Vector _velocity;
 
         private Vector _position;
-
-        private double velocityLength;
 
         private volatile bool isMoving = true;
 

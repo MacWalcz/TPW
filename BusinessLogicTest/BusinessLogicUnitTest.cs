@@ -67,58 +67,50 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, Action<Vector, Data.IBall, object> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
     }
 
-    private class DataLayerDisposeFixcure : Data.DataAbstractAPI
-    {
-      internal bool Disposed = false;
+        private class DataLayerDisposeFixcure : Data.DataAbstractAPI
+        {
+            internal bool Disposed = false;
 
-      public override void Dispose()
-      {
-        Disposed = true;
-      }
+            public override void Dispose()
+            {
+                Disposed = true;
+            }
 
-      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
-      {
-        throw new NotImplementedException();
-      }
-    }
+            public override void Start(int numberOfBalls, Action<Vector, Data.IBall, object> upperLayerHandler)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-    private class DataLayerStartFixcure : Data.DataAbstractAPI
-    {
-      internal bool StartCalled = false;
-      internal int NumberOfBallseCreated = -1;
+        private class DataLayerStartFixcure : Data.DataAbstractAPI
+        {
+            internal bool StartCalled = false;
+            internal int NumberOfBallseCreated = -1;
 
-      public override void Dispose()
-      { }
+            public override void Dispose()
+            { }
 
-      public override void Start(int numberOfBalls, Action<Vector, Data.IBall> upperLayerHandler)
-      {
-        StartCalled = true;
-        NumberOfBallseCreated = numberOfBalls;
-        upperLayerHandler(new Vector(0,0), new DataBallFixture());
-      }
+            public override void Start(int numberOfBalls, Action<Vector, Data.IBall, object> upperLayerHandler)
+            {
+                StartCalled = true;
+                NumberOfBallseCreated = numberOfBalls;
+                upperLayerHandler(new Vector(0, 0), new DataBallFixture(), null);
+            }
 
-     
-
-
-
-      private class DataBallFixture : Data.IBall
-      {
-        public Vector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        
-                
-
+            private class DataBallFixture : Data.IBall
+            {
+                public Vector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
                 public double Mass { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
-
                 public Vector Position { get; }
                 public event EventHandler<Vector>? NewPositionNotification = null;
-      }
-    }
+            }
+        }
 
     #endregion testing instrumentation
   }
