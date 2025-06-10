@@ -23,7 +23,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region public API
 
-        public abstract void Start(int numberOfBalls, Action<Vector, IBall,object> upperLayerHandler);
+        public abstract void Start(int numberOfBalls, Action<Vector, IBall> upperLayerHandler);
 
         #endregion public API
 
@@ -47,9 +47,7 @@ namespace TP.ConcurrentProgramming.Data
         event EventHandler<Vector> NewPositionNotification;
 
         Vector Velocity { get; set; }
-
         Vector Position { get;}
-
         public int Id { get; }
         double Mass { get; }
 

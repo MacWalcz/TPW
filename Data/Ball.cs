@@ -17,13 +17,13 @@ namespace TP.ConcurrentProgramming.Data
         #region ctor
 
         public int Id { get; }
-        internal Ball(int id, Vector initialPosition, Vector initialVelocity, double initialMass, object Lock)
+        internal Ball(int id, Vector initialPosition, Vector initialVelocity, double initialMass)
         {
             Id = id;
             _position = initialPosition;
             Velocity = initialVelocity;
             Mass = initialMass;
-            _Lock = Lock;
+
         }
 
         #endregion ctor
@@ -43,19 +43,14 @@ namespace TP.ConcurrentProgramming.Data
             set
             {
 
-                _velocity = value;
-
+                lock (_Lock)
+                {
+                    _velocity = value;
+                }
             }
         }
 
-        internal (Vector position, Vector velocity) GetSnapshot()
-        {
-            lock (_Lock)
-            {
-                return (Position, Velocity);
-            }
-        }
-
+      
 
         public Vector Position
         {
@@ -80,7 +75,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
-        private readonly object _Lock;
+        private readonly object _Lock = new ();
 
         private Vector _velocity;
 
@@ -117,12 +112,13 @@ namespace TP.ConcurrentProgramming.Data
 
         internal void Move(double deltaTime)
         {
-            lock (_Lock)
-            {
+           
+              
                 Position = new Vector(Position.x + Velocity.x * deltaTime,
                                      Position.y + Velocity.y * deltaTime
                                      );
-            }
+            
+            
             RaiseNewPositionChangeNotification();
         }
 

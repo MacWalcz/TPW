@@ -27,6 +27,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
+    public abstract void CheckCollisions(Data.IBall ball);
+
     #region IDisposable
 
     public abstract void Dispose();

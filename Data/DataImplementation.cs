@@ -38,7 +38,7 @@ namespace TP.ConcurrentProgramming.Data
 
         #region DataAbstractAPI
 
-        public override void Start(int numberOfBalls, Action<Vector, IBall,object> upperLayerHandler)
+        public override void Start(int numberOfBalls, Action<Vector, IBall> upperLayerHandler)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(DataImplementation));
@@ -48,41 +48,46 @@ namespace TP.ConcurrentProgramming.Data
             for (int i = 0; i < numberOfBalls; i++)
             {
                 int id = i + 1;
-                object LockObject = new();
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-                Ball newBall = new(id,startingPosition,startingPosition, 20,LockObject);
+                Ball newBall = new(id, startingPosition, startingPosition, 20);
 
-                newBall.NewPositionNotification += (sender, position) =>
-                {
-                    Ball b = (Ball)sender;
+                //newBall.NewPositionNotification += (sender, position) =>
+                //{
+                //    Ball b = (Ball)sender;
 
-                    var(pos,vel) = b.GetSnapshot();
+                //    var (pos, vel) = b.GetSnapshot();
 
-                    var data = new BallDiagnosticData
-                    (
-                        b.Id,
-                        DateTime.UtcNow,
-                        pos.x,
-                        pos.y,
-                        vel.x,
-                        vel.y
-                    );
+                //    var data = new BallDiagnosticData
+                //    (
+                //        b.Id,
+                //        DateTime.UtcNow,
+                //        pos.x,
+                //        pos.y,
+                //        vel.x,
+                //        vel.y
+                //    );
 
-                    var line = _serializer.Serialize(data);
+                //    var line = _serializer.Serialize(data);
 
-                    if(!_writer.Enqueue(line))
-                    {
-                        Debug.WriteLine($"[Diagnostics] bufor pełny, porzucono wpis kulki #{b.Id}");
-                    }
+                //    if (!_writer.Enqueue(line))
+                //    {
+                //        Debug.WriteLine($"[Diagnostics] bufor pełny, porzucono wpis kulki #{b.Id}");
+                //    }
 
-                };
-                upperLayerHandler(startingPosition, newBall,LockObject);
+                //};
+                upperLayerHandler(startingPosition, newBall);
                 BallsList.Add(newBall);
                 newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 150, (RandomGenerator.NextDouble() - 0.5) * 150);
-                newBall.StartMoving();
+
 
 
             }
+            foreach (Ball ball in BallsList)
+            {
+                ball.StartMoving();
+            }
+
+
         }
         #endregion DataAbstractAPI
 
@@ -96,7 +101,7 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     foreach (var ball in BallsList)
                     {
-                        ball.Stop(); 
+                        ball.Stop();
                     }
                     BallsList.Clear();
 
