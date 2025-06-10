@@ -10,6 +10,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -63,18 +64,22 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 if (checkedPosition.x >= rightBoundary)
                 {
                     ball.Velocity = new Data.Vector(-Math.Abs(checkedVelocity.x), checkedVelocity.y);
+                return;
                 }
                 else if (checkedPosition.x <= 0)
                 {
                     ball.Velocity = new Data.Vector(Math.Abs(checkedVelocity.x), checkedVelocity.y);
+                return;
                 }
                 else if (checkedPosition.y >= bottomBoundary)
                 {
                     ball.Velocity = new Data.Vector(checkedVelocity.x, -Math.Abs(checkedVelocity.y));
+                return;
                 }
                 else if (checkedPosition.y <= 0)
                 {
                     ball.Velocity = new Data.Vector(checkedVelocity.x, Math.Abs(checkedVelocity.y));
+                return;
                 }
 
                 

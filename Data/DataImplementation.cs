@@ -10,28 +10,34 @@
 
 using System.Diagnostics;
 using TP.ConcurrentProgramming.Data.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Formatting.Json;
 
 
 namespace TP.ConcurrentProgramming.Data
 {
-    internal class DataImplementation : DataAbstractAPI
+    internal class DataImplementation : DataAbstractAPI, IDisposable
     {
         #region ctor
 
-        private readonly IDiagnosticSerializer<BallDiagnosticData> _serializer;
-        private readonly FileDiagnosticWriter _writer;
+        private readonly Serilog.ILogger _log;
         private readonly List<Ball> BallsList = new();
         private bool Disposed = false;
-        private readonly string _logPath;
         private Random RandomGenerator = new();
 
 
-        public DataImplementation()
+        public DataImplementation(string logPath)
         {
-            _logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ball_diagnostics.log");
-
-            _serializer = new AsciiDiagnosticSerializer();
-            _writer = new FileDiagnosticWriter(_logPath);
+            // Konfiguracja Serilog – tylko plik, JSONFormatter
+            _log = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(
+                    formatter: new JsonFormatter(renderMessage: true),
+                    path: logPath,
+                    rollingInterval: RollingInterval.Day
+                )
+                .CreateLogger();
         }
 
         #endregion ctor
@@ -51,30 +57,18 @@ namespace TP.ConcurrentProgramming.Data
                 Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
                 Ball newBall = new(id, startingPosition, startingPosition, 20);
 
-                //newBall.NewPositionNotification += (sender, position) =>
-                //{
-                //    Ball b = (Ball)sender;
+                newBall.NewPositionNotification += (sender, pos) =>
+                {
+                    var b = (Ball)sender;
+                    var data = new BallDiagnosticData(
+                        b.Id,
+                        DateTime.UtcNow,
+                        pos.x, pos.y,
+                        b.Velocity.x, b.Velocity.y
+                    );
 
-                //    var (pos, vel) = b.GetSnapshot();
-
-                //    var data = new BallDiagnosticData
-                //    (
-                //        b.Id,
-                //        DateTime.UtcNow,
-                //        pos.x,
-                //        pos.y,
-                //        vel.x,
-                //        vel.y
-                //    );
-
-                //    var line = _serializer.Serialize(data);
-
-                //    if (!_writer.Enqueue(line))
-                //    {
-                //        Debug.WriteLine($"[Diagnostics] bufor pełny, porzucono wpis kulki #{b.Id}");
-                //    }
-
-                //};
+                    _log.Debug("{@BallDiagnosticData}", data);
+                };
                 upperLayerHandler(startingPosition, newBall);
                 BallsList.Add(newBall);
                 newBall.Velocity = new Vector((RandomGenerator.NextDouble() - 0.5) * 150, (RandomGenerator.NextDouble() - 0.5) * 150);
@@ -104,8 +98,6 @@ namespace TP.ConcurrentProgramming.Data
                         ball.Stop();
                     }
                     BallsList.Clear();
-
-                    _writer.Dispose();
                 }
                 Disposed = true;
             }

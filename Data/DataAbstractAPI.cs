@@ -8,6 +8,11 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using Microsoft.Extensions.Logging;
+using Serilog.Formatting.Json;
+using Serilog;
+using TP.ConcurrentProgramming.Data.Diagnostics;
+
 namespace TP.ConcurrentProgramming.Data
 {
     public abstract class DataAbstractAPI : IDisposable
@@ -35,7 +40,14 @@ namespace TP.ConcurrentProgramming.Data
 
         #region private
 
-        private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
+        private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() =>
+{
+    var logPath = Path.Combine(
+        AppDomain.CurrentDomain.BaseDirectory,
+        "ball_diagnostics.json"
+    );
+    return new DataImplementation(logPath);
+});
 
         #endregion private
     }

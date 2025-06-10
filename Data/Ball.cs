@@ -112,10 +112,10 @@ namespace TP.ConcurrentProgramming.Data
 
         internal void Move(double deltaTime)
         {
-           
-              
-                Position = new Vector(Position.x + Velocity.x * deltaTime,
-                                     Position.y + Velocity.y * deltaTime
+
+                Vector currentVelocity = _velocity;   
+                Position = new Vector(Position.x + currentVelocity.x * deltaTime,
+                                     Position.y + currentVelocity.y * deltaTime
                                      );
             
             
